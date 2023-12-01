@@ -36,11 +36,10 @@ class _QuizPageState extends State<QuizPage> {
   var questionNumber = 0;
   bool exit = false;
   QuizeBrain questions = QuizeBrain();
-  // Map<String, dynamic> myMap = {'$q1.questionText' : 'q1.questionAnswer'};
 
   @override
   Widget build(BuildContext context) {
-    questionListLength = questions.questionBank.length;
+    questionListLength = questions.getQuestionsLength();
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -51,7 +50,9 @@ class _QuizPageState extends State<QuizPage> {
             padding: const EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                questions.questionBank[questionNumber].questionText,
+                questionNumber < questionListLength - 1
+                    ? questions.getQuestionText(questionNumber)
+                    : 'Finished,\n Your score is $correctAnswerScore / $questionListLength',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 25.0,
@@ -80,8 +81,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                var correctAnswer =
-                    questions.questionBank[questionNumber].questionAnswer;
+                var correctAnswer = questions.getQuestionAnswer(questionNumber);
                 if (correctAnswer == true && exit == false) {
                   setState(() {
                     scoreKeeper.add(
@@ -101,8 +101,6 @@ class _QuizPageState extends State<QuizPage> {
                   questionNumber++;
                 } else {
                   exit = true;
-                  questions.questionBank[questionNumber].questionText =
-                      'Finished, your score is $correctAnswerScore / $questionListLength';
                 }
               },
             ),
@@ -126,8 +124,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                var correctAnswer =
-                    questions.questionBank[questionNumber].questionAnswer;
+                var correctAnswer = questions.getQuestionAnswer(questionNumber);
                 if (correctAnswer == false && exit == false) {
                   setState(() {
                     scoreKeeper.add(
@@ -146,8 +143,6 @@ class _QuizPageState extends State<QuizPage> {
                 if (questionNumber < questionListLength - 1) {
                   questionNumber++;
                 } else {
-                  questions.questionBank[questionNumber].questionText =
-                      'Finished, your score is $correctAnswerScore / $questionListLength';
                   exit = true;
                 }
               },

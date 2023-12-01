@@ -1,7 +1,7 @@
 import 'package:quizzler/question.dart';
 
 class QuizeBrain {
-  List<Question> questionBank = [
+  final List<Question> _questionBank = [
     Question(
         questionText: 'You can lead a cow down stairs but not up stairs.',
         questionAnswer: false),
@@ -44,4 +44,16 @@ class QuizeBrain {
             'In West Virginia, USA, if you accidentally hit an animal with your car, you are free to take it home to eat.',
         questionAnswer: true),
   ];
+
+  String getQuestionText(int num) {
+    return _questionBank[num].questionText;
+  }
+
+  bool getQuestionAnswer(int num) {
+    return _questionBank[num].questionAnswer;
+  }
+
+  int getQuestionsLength() {
+    return _questionBank.length;
+  }
 }
