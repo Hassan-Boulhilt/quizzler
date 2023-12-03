@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:quizzler/quizbrain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() {
   runApp(const MainApp());
@@ -33,9 +36,84 @@ class _QuizPageState extends State<QuizPage> {
   var correctAnswerScore = 0;
   var wrongAnswerScore = 0;
   var questionListLength = 0;
-  var questionNumber = 0;
+
   bool exit = false;
   QuizeBrain questions = QuizeBrain();
+
+  void checkAnswer(bool userAnswer) {
+    bool answer = questions.getQuestionAnswer();
+    setState(() {
+      if (answer == userAnswer) {
+        scoreKeeper.add(
+          const Icon(Icons.check, color: Colors.green),
+        );
+        correctAnswerScore++;
+      } else {
+        scoreKeeper.add(
+          const Icon(Icons.close, color: Colors.red),
+        );
+        wrongAnswerScore++;
+      }
+    });
+    if (questions.hasNext()) {
+      questions.nextQuestion();
+    } else {
+      displayAlert();
+    }
+  }
+
+  void reinitialiserEtat() {
+    setState(() {
+      questions.initCursor();
+      scoreKeeper = [];
+      correctAnswerScore = 0;
+      wrongAnswerScore = 0;
+    });
+  }
+
+  void displayAlert() {
+    Alert(
+      context: context,
+      type: correctAnswerScore > wrongAnswerScore
+          ? AlertType.success
+          : AlertType.warning,
+      title: correctAnswerScore > wrongAnswerScore
+          ? "Congratulation!\nYour Score is:"
+          : "Try again!\nYou Score is:",
+      desc: "$correctAnswerScore / $questionListLength",
+      buttons: [
+        DialogButton(
+          onPressed: () {
+            // Check platform
+            if (defaultTargetPlatform == TargetPlatform.android) {
+              FlutterExitApp.exitApp();
+            } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+              FlutterExitApp.exitApp(iosForceExit: true);
+            }
+          },
+          color: const Color.fromRGBO(0, 179, 134, 1.0),
+          child: const Text(
+            "Exit",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        ),
+        DialogButton(
+          onPressed: () {
+            reinitialiserEtat();
+            Navigator.pop(context);
+          },
+          gradient: const LinearGradient(colors: [
+            Color.fromRGBO(116, 116, 191, 1.0),
+            Color.fromRGBO(52, 138, 199, 1.0)
+          ]),
+          child: const Text(
+            "OK",
+            style: TextStyle(color: Colors.white, fontSize: 20),
+          ),
+        )
+      ],
+    ).show();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +128,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: const EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                questionNumber < questionListLength - 1
-                    ? questions.getQuestionText(questionNumber)
-                    : 'Finished,\n Your score is $correctAnswerScore / $questionListLength',
+                questions.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 25.0,
@@ -81,27 +157,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                var correctAnswer = questions.getQuestionAnswer(questionNumber);
-                if (correctAnswer == true && exit == false) {
-                  setState(() {
-                    scoreKeeper.add(
-                      const Icon(Icons.check, color: Colors.green),
-                    );
-                  });
-                  correctAnswerScore++;
-                } else if (correctAnswer == false && exit == false) {
-                  setState(() {
-                    scoreKeeper.add(
-                      const Icon(Icons.close, color: Colors.red),
-                    );
-                  });
-                  wrongAnswerScore++;
-                }
-                if (questionNumber < questionListLength - 1) {
-                  questionNumber++;
-                } else {
-                  exit = true;
-                }
+                checkAnswer(true);
               },
             ),
           ),
@@ -124,27 +180,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                var correctAnswer = questions.getQuestionAnswer(questionNumber);
-                if (correctAnswer == false && exit == false) {
-                  setState(() {
-                    scoreKeeper.add(
-                      const Icon(Icons.check, color: Colors.green),
-                    );
-                  });
-                  correctAnswerScore++;
-                } else if (correctAnswer == true && exit == false) {
-                  setState(() {
-                    scoreKeeper.add(
-                      const Icon(Icons.close, color: Colors.red),
-                    );
-                  });
-                  wrongAnswerScore++;
-                }
-                if (questionNumber < questionListLength - 1) {
-                  questionNumber++;
-                } else {
-                  exit = true;
-                }
+                checkAnswer(false);
               },
             ),
           ),
