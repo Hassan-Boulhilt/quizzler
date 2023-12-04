@@ -37,29 +37,44 @@ class _QuizPageState extends State<QuizPage> {
   var wrongAnswerScore = 0;
   var questionListLength = 0;
 
-  bool exit = false;
   QuizeBrain questions = QuizeBrain();
 
   void checkAnswer(bool userAnswer) {
-    bool answer = questions.getQuestionAnswer();
+    bool? answer;
+    if (scoreKeeper.length < questionListLength) {
+      answer = questions.getQuestionAnswer();
+    }
+
     setState(() {
       if (answer == userAnswer) {
         scoreKeeper.add(
           const Icon(Icons.check, color: Colors.green),
         );
+        questions.nextQuestion();
         correctAnswerScore++;
-      } else {
+        var scorekpperLength = scoreKeeper.length;
+        print("scorelength : $scorekpperLength");
+        print("wrong answer : $wrongAnswerScore");
+        print("correct answer : $correctAnswerScore");
+      } else if (answer != userAnswer) {
         scoreKeeper.add(
           const Icon(Icons.close, color: Colors.red),
         );
+        questions.nextQuestion();
         wrongAnswerScore++;
+        var scorekpperLength = scoreKeeper.length;
+        print("scorelength : $scorekpperLength");
+        print("wrong answer : $wrongAnswerScore");
+        print("correct answer : $correctAnswerScore");
+      }
+      if (!questions.hasNext()) {
+        var scorekpperLength = scoreKeeper.length;
+        print("scorelength : $scorekpperLength");
+        print("wrong answer : $wrongAnswerScore");
+        print("correct answer : $correctAnswerScore");
+        displayAlert();
       }
     });
-    if (questions.hasNext()) {
-      questions.nextQuestion();
-    } else {
-      displayAlert();
-    }
   }
 
   void reinitialiserEtat() {
@@ -73,6 +88,7 @@ class _QuizPageState extends State<QuizPage> {
 
   void displayAlert() {
     Alert(
+      style: const AlertStyle(isCloseButton: false, isOverlayTapDismiss: false),
       context: context,
       type: correctAnswerScore > wrongAnswerScore
           ? AlertType.success
@@ -110,7 +126,7 @@ class _QuizPageState extends State<QuizPage> {
             "OK",
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
-        )
+        ),
       ],
     ).show();
   }
@@ -128,7 +144,9 @@ class _QuizPageState extends State<QuizPage> {
             padding: const EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                questions.getQuestionText(),
+                scoreKeeper.length < questionListLength
+                    ? questions.getQuestionText()
+                    : "",
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 25.0,

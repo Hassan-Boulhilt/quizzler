@@ -2,6 +2,7 @@ import 'package:quizzler/question.dart';
 
 class QuizeBrain {
   int _questionNumber = 0;
+
   final List<Question> _questionBank = [
     Question(
         questionText: 'You can lead a cow down stairs but not up stairs.',
@@ -45,14 +46,15 @@ class QuizeBrain {
             'In West Virginia, USA, if you accidentally hit an animal with your car, you are free to take it home to eat.',
         questionAnswer: true),
   ];
+
   void nextQuestion() {
-    if (_questionNumber < _questionBank.length - 1) {
+    if (_questionNumber < _questionBank.length) {
       _questionNumber++;
     }
   }
 
   bool hasNext() {
-    if (_questionNumber < _questionBank.length - 1) {
+    if (_questionNumber < _questionBank.length) {
       return true;
     }
     return false;
